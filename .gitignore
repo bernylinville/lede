@@ -28,3 +28,4 @@ git-src
 .cproject
 .ccache
 .vscode*
+.vagrant
