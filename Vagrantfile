@@ -8,13 +8,17 @@ libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-d
 mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools \
 libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip \
 vim wget xmlto xxd zlib1g-dev
-cd /home/vagrant
+mkfs -t ext4 /dev/vdb
+mkdir /data
+mount /dev/vdb /data
+cd /data
 git clone https://github.com/bernylinville/lede.git
-cd /home/vagrant/lede
+cd /data/lede
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 make download -j8
-make V=s -j$(nproc)
+chown -R vagrant:vagrant /data/lede
+su - vagrant -c "cd /data/lede && make V=s -j1"
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -22,6 +26,7 @@ Vagrant.configure("2") do |config|
     config.vm.provider :libvirt do |l|
         l.memory = 8192
         l.cpus = 8
+        l.storage :file, :size => '50G'
         l.storage_pool_name = "images"
     end
     config.vm.provision "shell", inline: $script
